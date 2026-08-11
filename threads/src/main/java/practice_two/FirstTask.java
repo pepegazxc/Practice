@@ -1,19 +1,23 @@
 package practice_two;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 public class FirstTask {
     static class Cell {
-        private boolean full = false;
+        private final Queue<Integer> BUFFER = new ArrayDeque<>();
+        private static Integer CAPACITY = 5;
 
-        synchronized void put() throws InterruptedException {
-            while (full) wait();
-            full = true;
+        synchronized void put(int num) throws InterruptedException {
+            while (BUFFER.size() == CAPACITY ) wait();
+            BUFFER.add(num);
             System.out.println(Thread.currentThread().getName() + ": Put");
             notifyAll();
         }
 
         synchronized void take() throws InterruptedException {
-            while (!full) wait();
-            full = false;
+            while (BUFFER.isEmpty()) wait();
+            BUFFER.poll();
             System.out.println(Thread.currentThread().getName() + ": Take");
             notifyAll();
         }
@@ -24,7 +28,7 @@ public class FirstTask {
 
         Runnable putter = () -> {
             try {
-                for (int i = 0; i < 5; i++) cell.put();
+                for (int i = 0; i < 15; i++) cell.put(i);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -32,7 +36,7 @@ public class FirstTask {
 
         Runnable taker = () -> {
             try {
-                for (int i = 0; i < 5; i++) cell.take();
+                for (int i = 0; i < 15; i++) cell.take();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
